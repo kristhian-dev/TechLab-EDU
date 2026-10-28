@@ -1,0 +1,22 @@
+*.log
+.env
+.env.*
+.DS_Store
+
+# Sessões temporárias do PHP
+storage/sessions/*
+!storage/sessions/.gitkeep
+
+# Uploads de usuários
+storage/uploads/*
+!storage/uploads/perfil/
+storage/uploads/perfil/*
+!storage/uploads/perfil/.htaccess
+
+# Arquivos de backup e testes temporários
+*.bak
+*.bak-*
+*.audit-backup-*
+*.fixed
+*.test-fix
+*.bak*

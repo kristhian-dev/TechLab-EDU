@@ -1,0 +1,606 @@
+.classes-content {
+    min-height: calc(100vh - 70px);
+}
+
+.classes-heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+.eyebrow {
+    color: #1d4ed8;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.classes-heading h1 {
+    margin-top: 6px;
+    color: #1e293b;
+    font-size: 32px;
+    line-height: 1.1;
+}
+
+.classes-heading p {
+    margin-top: 8px;
+    color: #64748b;
+    font-size: 15px;
+}
+
+.primary-action,
+.secondary-action {
+    border: 0;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 700;
+    transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.primary-action {
+    padding: 12px 18px;
+    background: #1d4ed8;
+    color: white;
+    box-shadow: 0 6px 14px rgba(29, 78, 216, 0.2);
+}
+
+.primary-action:hover,
+.secondary-action:hover {
+    transform: translateY(-1px);
+}
+
+.primary-action:hover {
+    background: #1e40af;
+}
+
+.classes-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.classes-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: min(100%, 360px);
+    padding: 10px 14px;
+    background: white;
+    border: 1px solid #dbe3ef;
+    border-radius: 8px;
+    color: #94a3b8;
+}
+
+.classes-search input {
+    width: 100%;
+    border: 0;
+    outline: 0;
+    color: #1e293b;
+    font-size: 14px;
+}
+
+.classes-count {
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.classes-panel {
+    min-height: 420px;
+    padding: 24px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+}
+
+.panel-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid #eef2f7;
+}
+
+.panel-heading h2 {
+    color: #1e293b;
+    font-size: 20px;
+}
+
+.panel-heading p {
+    margin-top: 5px;
+    color: #64748b;
+    font-size: 13px;
+}
+
+.panel-heading > img {
+    width: 24px;
+    height: 24px;
+}
+
+.classes-empty {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 300px;
+    text-align: center;
+}
+
+.empty-icon {
+    display: grid;
+    width: 58px;
+    height: 58px;
+    margin-bottom: 14px;
+    place-items: center;
+    background: #eff6ff;
+    border-radius: 50%;
+}
+
+.empty-icon img {
+    width: 28px;
+    height: 28px;
+}
+
+.classes-empty h3 {
+    color: #1e293b;
+    font-size: 18px;
+}
+
+.classes-empty p {
+    max-width: 340px;
+    margin-top: 7px;
+    color: #64748b;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.secondary-action {
+    margin-top: 18px;
+    padding: 10px 16px;
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.secondary-action:hover {
+    background: #dbeafe;
+}
+
+@media (max-width: 760px) {
+    .classes-heading,
+    .classes-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .primary-action,
+    .classes-search {
+        width: 100%;
+    }
+
+    .classes-panel {
+        padding: 18px;
+    }
+}
+
+/* Abas de turmas */
+.classes-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.classes-tab {
+    padding: 10px 18px;
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    border-bottom: 3px solid transparent;
+    border-radius: 8px 8px 0 0;
+    transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+
+.classes-tab:hover {
+    color: #1d4ed8;
+    background: #f8fafc;
+}
+
+.classes-tab.active {
+    color: #1d4ed8;
+    border-bottom-color: #1d4ed8;
+}
+
+/* Formulários */
+.turma-form {
+    max-width: 520px;
+    margin-top: 20px;
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 16px;
+}
+
+.form-field label {
+    color: #1e293b;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.form-field input,
+.form-field textarea {
+    padding: 10px 14px;
+    border: 1px solid #dbe3ef;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    outline: 0;
+}
+
+.form-field input:focus,
+.form-field textarea:focus {
+    border-color: #1d4ed8;
+}
+
+.form-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.btn-neutral {
+    display: inline-block;
+    padding: 12px 18px;
+    background: #f1f5f9;
+    color: #475569;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.btn-neutral:hover {
+    background: #e2e8f0;
+}
+
+/* Bloco de sucesso com o codigo de entrada (pos-criacao) */
+.code-success {
+    margin-bottom: 18px;
+    padding: 20px 22px;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 14px;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+}
+
+.code-success-eyebrow {
+    color: #166534;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.code-success h2 {
+    margin-top: 6px;
+    color: #14532d;
+    font-size: 20px;
+}
+
+.code-success p {
+    margin-top: 8px;
+    color: #3f6212;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.code-success-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 14px;
+}
+
+.code-success-row code,
+.turma-code-line code {
+    padding: 8px 14px;
+    background: #ffffff;
+    border: 1px dashed #16a34a;
+    border-radius: 8px;
+    color: #14532d;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+}
+
+.turma-code-line {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.code-copy {
+    white-space: nowrap;
+}
+
+.code-copy-inline {
+    padding: 6px 12px;
+    font-size: 12px;
+}
+
+.code-copy-feedback {
+    min-height: 18px;
+    margin-top: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.code-copy-feedback.ok {
+    color: #166534;
+}
+
+.code-copy-feedback.error {
+    color: #b91c1c;
+}
+
+/* Flash messages */
+.flash-message {
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 18px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.flash-success {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.flash-danger {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.flash-warning {
+    background: #fef9c3;
+    color: #854d0e;
+}
+
+/* Cards de turma */
+.turma-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+    margin-top: 20px;
+    list-style: none;
+}
+
+.turma-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 18px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+}
+
+.turma-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.turma-code {
+    padding: 3px 10px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.turma-students {
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.turma-name {
+    color: #1e293b;
+    font-size: 17px;
+}
+
+.turma-description {
+    color: #64748b;
+    font-size: 13px;
+    line-height: 1.5;
+    flex-grow: 1;
+}
+
+.turma-card .secondary-action {
+    align-self: flex-start;
+    margin-top: 6px;
+    text-decoration: none;
+}
+
+/* Acoes do card e da lista de alunos */
+.turma-delete-form {
+    align-self: flex-start;
+    margin-top: 8px;
+}
+
+.aluno-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.aluno-actions .mini-action {
+    text-decoration: none;
+}
+
+/* Detalhe individual do aluno */
+.student-block {
+    margin-bottom: 18px;
+}
+
+.student-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.student-summary > div {
+    padding: 12px 14px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+}
+
+.student-summary span {
+    display: block;
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.student-summary strong {
+    display: block;
+    margin-top: 4px;
+    color: #1e293b;
+    font-size: 15px;
+}
+
+.student-progress {
+    margin-top: 18px;
+}
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 16px;
+    color: #1d4ed8;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.back-link:hover {
+    text-decoration: underline;
+}
+
+/* Busca e lista de alunos */
+.aluno-search-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.aluno-search-form .classes-search {
+    flex-grow: 1;
+}
+
+.aluno-results {
+    margin-top: 22px;
+}
+
+.aluno-results h3 {
+    color: #1e293b;
+    font-size: 15px;
+    margin-bottom: 10px;
+}
+
+.aluno-empty-hint {
+    color: #64748b;
+    font-size: 13px;
+}
+
+.aluno-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.aluno-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+}
+
+.aluno-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.aluno-info strong {
+    color: #1e293b;
+    font-size: 14px;
+}
+
+.aluno-info small {
+    color: #64748b;
+    font-size: 12px;
+}
+
+.aluno-badge {
+    padding: 4px 10px;
+    background: #f1f5f9;
+    color: #64748b;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.mini-action {
+    padding: 7px 14px;
+    border: 0;
+    border-radius: 8px;
+    background: #1d4ed8;
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s;
+}
+
+.mini-action:hover {
+    background: #1e40af;
+}
+
+.mini-action.danger {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.mini-action.danger:hover {
+    background: #fecaca;
+}

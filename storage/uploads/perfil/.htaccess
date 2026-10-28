@@ -1,0 +1,10 @@
+# Impede qualquer acesso web direto ao diretorio de uploads de perfil.
+# As imagens sao entregues apenas pelo endpoint views/perfil/foto.php,
+# que valida o usuario autenticado. Compativel com Apache 2.2 e 2.4.
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+</IfModule>

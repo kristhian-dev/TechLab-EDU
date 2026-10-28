@@ -1,0 +1,201 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.login-body {
+    background: url('../../assets/tela-Fundo.png') no-repeat center center fixed;
+    background-size: cover;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    zoom: 90%;
+    padding-top: 5vh;
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+
+}
+
+.login_card {
+    background-color: #ffffff;
+    border-radius: 20px;
+    padding: 20px;
+    width: 450px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    text-align: center;
+
+}
+
+.title {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.title img {
+    width: 40px;
+}
+
+.title .logo {
+    width: 90px;
+}
+
+.TechLab {
+    font-size: 28px;
+    font-weight: bold;
+    color: #333;
+}
+
+.edu {
+    font-size: 28px;
+    font-weight: bold;
+    color: #0066ff;
+}
+
+.sub_title h2 {
+    font-size: 22px;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.sub_title p {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 30px;
+}
+
+.input-field {
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+.input-field label {
+    display: block;
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.input-group {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 10px;
+    background: #fff;
+}
+
+.input-icon {
+    width: 20px;
+    margin-right: 10px;
+}
+
+.input-group input {
+    border: none;
+    outline: none;
+    width: 100%;
+    font-size: 14px;
+}
+
+.view-icon {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    display: block;
+    opacity: 1;
+    filter: none;
+    margin-left: 6px;
+}
+
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    font-size: 13px;
+}
+
+.remember-me {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: #333;
+    cursor: pointer;
+}
+
+.forgot-password {
+    color: #0066ff;
+    text-decoration: none;
+}
+
+.btn-login {
+    width: 100%;
+    padding: 12px;
+    background-color: #0066ff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-bottom: 20px;
+}
+
+.divider {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.profile-options {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.btn-profile {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #333;
+    transition: background-color 0.2s;
+}
+
+.btn-profile img {
+    width: 20px;
+}
+
+.btn-profile.selected {
+    background-color: #d1e3ff;
+    color: #0066ff;
+    border-color: #0066ff;
+}
+
+.login-footer {
+    font-size: 13px;
+    color: #333;
+}
+
+.login-footer a {
+    color: #0066ff;
+    text-decoration: none;
+    font-weight: bold;
+}

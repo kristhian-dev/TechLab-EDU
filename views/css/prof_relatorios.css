@@ -1,0 +1,224 @@
+.report-heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+.report-heading .eyebrow {
+    color: #1d4ed8;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.report-heading h1 {
+    margin-top: 6px;
+    color: #1e293b;
+    font-size: 32px;
+    line-height: 1.1;
+}
+
+.report-heading p {
+    margin-top: 8px;
+    color: #64748b;
+    font-size: 15px;
+}
+
+.print-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 18px;
+    border: 0;
+    border-radius: 8px;
+    background: #1d4ed8;
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 6px 14px rgba(29, 78, 216, 0.2);
+    transition: transform 0.2s, background 0.2s;
+    white-space: nowrap;
+}
+
+.print-button:hover {
+    background: #1e40af;
+    transform: translateY(-1px);
+}
+
+.print-button img {
+    width: 16px;
+    height: 16px;
+    filter: brightness(0) invert(1);
+}
+
+/* Resumo */
+.report-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.report-summary-card {
+    padding: 18px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+}
+
+.report-summary-card span {
+    display: block;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.report-summary-card strong {
+    display: block;
+    margin-top: 6px;
+    color: #1e293b;
+    font-size: 28px;
+}
+
+/* Painel do relatório */
+.report-panel {
+    padding: 24px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+}
+
+.report-panel > h2 {
+    padding-bottom: 14px;
+    border-bottom: 1px solid #eef2f7;
+    color: #1e293b;
+    font-size: 20px;
+}
+
+.report-turma {
+    padding: 18px 0;
+    border-bottom: 1px dashed #e2e8f0;
+}
+
+.report-turma:last-child {
+    border-bottom: 0;
+}
+
+.report-turma-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.report-turma-heading h3 {
+    color: #1e293b;
+    font-size: 17px;
+}
+
+.report-turma-code {
+    padding: 3px 10px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.report-turma-description {
+    margin-top: 6px;
+    color: #64748b;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.report-turma-stats {
+    margin-top: 8px;
+    color: #475569;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.report-table {
+    width: 100%;
+    margin-top: 12px;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.report-table th,
+.report-table td {
+    padding: 9px 12px;
+    text-align: left;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.report-table th {
+    background: #f8fafc;
+    color: #475569;
+    font-weight: 700;
+}
+
+.report-table td {
+    color: #334155;
+}
+
+.report-empty-students {
+    margin-top: 10px;
+    color: #94a3b8;
+    font-size: 13px;
+    font-style: italic;
+}
+
+.report-empty {
+    padding: 40px 0;
+    text-align: center;
+    color: #64748b;
+    font-size: 14px;
+}
+
+.report-generated {
+    margin-top: 18px;
+    color: #94a3b8;
+    font-size: 12px;
+}
+
+/* Impressão / PDF */
+@media print {
+    .main-header,
+    .sidebar,
+    .print-button {
+        display: none !important;
+    }
+
+    .main-container {
+        margin-top: 0 !important;
+    }
+
+    .content {
+        margin-left: 0 !important;
+        padding: 0 !important;
+    }
+
+    body {
+        background: #fff !important;
+    }
+
+    .report-summary-card,
+    .report-panel {
+        border: 1px solid #cbd5e1 !important;
+        box-shadow: none !important;
+    }
+
+    .report-turma {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+}
