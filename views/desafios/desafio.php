@@ -1,5 +1,12 @@
 <?php
-$challenges = [
+require_once __DIR__ . '/../../configuracoes/app.php';
+require_once __DIR__ . '/../../nucleo/Auth.php';
+require_once __DIR__ . '/../../modelos/DesafioModel.php';
+
+Auth::exigeLogin();
+
+if (false) {
+$legacyChallenges = [
     1 => [
         'title' => 'PC Gamer sem Vídeo',
         'category' => 'Diagnóstico',
@@ -196,13 +203,44 @@ $challenges = [
         'components' => ['Capacitores', 'Placa-mae', 'Fonte de alimentacao', 'Circuito de energia'],
     ],
 ];
+}
 
 $challengeId = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
-$challenge = $challengeId !== false && $challengeId !== null && isset($challenges[$challengeId]) ? $challenges[$challengeId] : null;
+$contextoTurma = filter_input(INPUT_GET, 'turma', FILTER_VALIDATE_INT);
+$contextoTurma = $contextoTurma !== false && $contextoTurma !== null && $contextoTurma > 0 ? $contextoTurma : null;
+$challenge = null;
+if ($challengeId !== false && $challengeId !== null && $challengeId > 0) {
+    $usuario = Auth::usuarioLogado() ?: [];
+    $desafio = ($usuario['perfil'] ?? 'aluno') === 'aluno'
+        ? DesafioModel::buscarVisivelParaAluno($challengeId, (int) ($usuario['id'] ?? 0), $contextoTurma)
+        : DesafioModel::buscarAtivoPorId($challengeId);
+    if ($desafio) {
+        $dificuldadeMap = [
+            'FACIL' => ['texto' => 'FÁCIL', 'classe' => 'easy'],
+            'MEDIO' => ['texto' => 'MÉDIO', 'classe' => 'medium'],
+            'DIFICIL' => ['texto' => 'DIFÍCIL', 'classe' => 'hard'],
+        ];
+        $dificuldade = $dificuldadeMap[$desafio['dificuldade']] ?? $dificuldadeMap['FACIL'];
+        $challenge = [
+            'title' => $desafio['titulo'],
+            'category' => $desafio['categoria'] ?: 'Desafio',
+            'difficulty' => $dificuldade['texto'],
+            'difficulty_class' => $dificuldade['classe'],
+            'xp' => (int) $desafio['pontuacao_maxima'],
+            'time' => 'Não informado',
+            'component' => $desafio['categoria'] ?: 'Não informado',
+            'description' => $desafio['descricao'],
+            'problem' => $desafio['descricao'],
+            'objective' => $desafio['objetivo'] ?: 'Não informado',
+            'components' => [],
+            'turma_nome' => $desafio['turma_nome'] ?? null,
+        ];
+    }
+}
 
 function escape($value)
 {
-    return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+    return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
 }
 ?>
 <!DOCTYPE html>
@@ -309,6 +347,12 @@ function escape($value)
                                     <dt>Dificuldade</dt>
                                     <dd><span class="difficulty <?= escape($challenge['difficulty_class']) ?>"><?= escape($challenge['difficulty']) ?></span></dd>
                                 </div>
+                                <?php if (!empty($challenge['turma_nome'])): ?>
+                                <div>
+                                    <dt>Contexto</dt>
+                                    <dd>Turma: <?= escape($challenge['turma_nome']) ?></dd>
+                                </div>
+                                <?php endif; ?>
                                 <div>
                                     <dt>Recompensa</dt>
                                     <dd>+<?= escape($challenge['xp']) ?> XP</dd>

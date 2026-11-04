@@ -64,10 +64,11 @@ $pdo->beginTransaction();
 
 try {
     $stmt = $pdo->prepare(
-        'SELECT b.id_build, b.id_aluno, a.matricula, a.pontuacao_atual, dt.pontuacao_maxima, dt.categoria, dt.dificuldade
+        'SELECT b.id_build, b.id_aluno, a.matricula, a.pontuacao_atual,
+            d.pontuacao_maxima, d.categoria, d.dificuldade, d.visibilidade
          FROM builds b
          JOIN alunos a ON a.id_usuario = b.id_aluno
-         JOIN desafios dt ON dt.id_desafio = :id_desafio
+         JOIN desafios d ON d.id_desafio = :id_desafio AND d.ativo = TRUE
          WHERE b.id_build = :id_build AND a.id_usuario = :id_usuario'
     );
     $stmt->execute(['id_build' => $idBuild, 'id_usuario' => $idUsuario, 'id_desafio' => $idDesafio]);
@@ -81,9 +82,24 @@ try {
     }
 
     $stmt = $pdo->prepare(
-        'SELECT id_turma FROM aluno_turmas WHERE id_aluno = :id_aluno AND status = \'ATIVO\' LIMIT 1'
+        'SELECT at.id_turma
+         FROM aluno_turmas at
+          INNER JOIN desafios d
+               ON d.id_desafio = :id_desafio_desafio
+              AND d.ativo = TRUE
+         LEFT JOIN desafio_turmas dt
+              ON dt.id_turma = at.id_turma
+             AND dt.id_desafio = d.id_desafio
+         WHERE at.id_aluno = :id_aluno
+           AND at.status = \'ATIVO\'
+           AND (d.visibilidade = \'PUBLICO\' OR dt.id_desafio IS NOT NULL)
+         ORDER BY (dt.id_desafio IS NOT NULL) DESC, at.id_turma ASC
+         LIMIT 1'
     );
-    $stmt->execute(['id_aluno' => $build['id_aluno']]);
+    $stmt->execute([
+        'id_aluno' => $build['id_aluno'],
+        'id_desafio_desafio' => $idDesafio,
+    ]);
     $turma = $stmt->fetch();
 
     if (!$turma) {
@@ -169,6 +185,8 @@ try {
     if ($alunoDesafio && $alunoDesafio['status'] === 'CONCLUIDO') {
         $jáConcluido = true;
     }
+
+    $tentativasAtual = (int) ($alunoDesafio['numero_tentativas'] ?? 0) + 1;
 
     // Usar incremento atômico no banco de dados para evitar corrida de condições
     $pontuacaoIncremento = (int) ($build['pontuacao_maxima'] ?? 0);

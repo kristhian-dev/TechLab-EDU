@@ -110,10 +110,19 @@ CREATE TABLE desafios (
     pontuacao_maxima INT UNSIGNED NOT NULL DEFAULT 0,
     nivel_minimo INT UNSIGNED NOT NULL DEFAULT 1,
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    visibilidade ENUM('PUBLICO', 'PRIVADO') NULL DEFAULT NULL,
+    id_criador INT UNSIGNED NULL,
     data_criacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     data_atualizacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         ON UPDATE CURRENT_TIMESTAMP,
-    CONSTRAINT chk_desafio_nivel CHECK (nivel_minimo >= 1)
+    CONSTRAINT chk_desafio_nivel CHECK (nivel_minimo >= 1),
+    CONSTRAINT fk_desafio_criador
+        FOREIGN KEY (id_criador)
+        REFERENCES professores(id_usuario)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE,
+    INDEX idx_desafios_visibilidade_ativo (visibilidade, ativo),
+    INDEX idx_desafios_criador (id_criador)
 ) ENGINE=InnoDB;
 
 CREATE TABLE desafio_turmas (

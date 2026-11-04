@@ -2,6 +2,7 @@
 
 require_once APP_ROOT . '/nucleo/Seguranca.php';
 require_once APP_ROOT . '/nucleo/Auth.php';
+require_once APP_ROOT . '/modelos/DesafioModel.php';
 require_once APP_ROOT . '/modelos/TurmaModel.php';
 
 final class TurmaController
@@ -128,6 +129,79 @@ final class TurmaController
     }
 
     /**
+     * Processa a associação de um desafio a uma turma administrada.
+     */
+    public static function processarAssociarDesafio(): void
+    {
+        Auth::exigePerfil('professor', 'administrador');
+
+        $idTurma = (int) ($_POST['id_turma'] ?? 0);
+        $destino = self::destinoDesafios($idTurma);
+
+        if (!Seguranca::validarTokenCsrf()) {
+            Seguranca::flash('danger', 'Sessão inválida. Recarregue a página e tente novamente.');
+            Seguranca::redirecionar($destino);
+        }
+
+        $idDesafio = (int) ($_POST['id_desafio'] ?? 0);
+        $ordem = (int) ($_POST['ordem'] ?? 0);
+        $obrigatorio = isset($_POST['obrigatorio']);
+        $usuario = Auth::usuarioLogado();
+        $idProfessor = (int) ($usuario['id'] ?? 0);
+
+        if ($idTurma <= 0 || !TurmaModel::professorGerenciaTurma($idProfessor, $idTurma)) {
+            Seguranca::flash('danger', 'Turma inválida para o seu usuário.');
+            Seguranca::redirecionar($destino);
+        }
+
+        try {
+            $dataLiberacao = self::normalizarDataLiberacao($_POST['data_liberacao'] ?? '');
+            DesafioModel::associarATurma($idDesafio, $idTurma, $ordem, $obrigatorio, $dataLiberacao);
+            Seguranca::flash('success', 'Desafio associado à turma.');
+        } catch (Throwable $e) {
+            error_log('Erro ao associar desafio à turma: ' . $e->getMessage());
+            Seguranca::flash('danger', $e->getMessage());
+        }
+
+        Seguranca::redirecionar($destino);
+    }
+
+    /**
+     * Processa a remoção de uma associação desafio-turma.
+     */
+    public static function processarRemoverDesafio(): void
+    {
+        Auth::exigePerfil('professor', 'administrador');
+
+        $idTurma = (int) ($_POST['id_turma'] ?? 0);
+        $destino = self::destinoDesafios($idTurma);
+
+        if (!Seguranca::validarTokenCsrf()) {
+            Seguranca::flash('danger', 'Sessão inválida. Recarregue a página e tente novamente.');
+            Seguranca::redirecionar($destino);
+        }
+
+        $idDesafio = (int) ($_POST['id_desafio'] ?? 0);
+        $usuario = Auth::usuarioLogado();
+        $idProfessor = (int) ($usuario['id'] ?? 0);
+
+        if ($idTurma <= 0 || !TurmaModel::professorGerenciaTurma($idProfessor, $idTurma)) {
+            Seguranca::flash('danger', 'Turma inválida para o seu usuário.');
+            Seguranca::redirecionar($destino);
+        }
+
+        try {
+            DesafioModel::removerDaTurma($idDesafio, $idTurma);
+            Seguranca::flash('success', 'Desafio removido da turma.');
+        } catch (Throwable $e) {
+            error_log('Erro ao remover desafio da turma: ' . $e->getMessage());
+            Seguranca::flash('danger', $e->getMessage());
+        }
+
+        Seguranca::redirecionar($destino);
+    }
+
+    /**
      * Processa a exclusão lógica de uma turma (apenas o professor dono, via POST + CSRF).
      */
     public static function processarExclusao(): void
@@ -225,5 +299,26 @@ final class TurmaController
         }
 
         return $destino;
+    }
+
+    private static function destinoDesafios(int $idTurma): string
+    {
+        return '/views/professor/turmas.php?aba=desafios&id=' . max(0, $idTurma);
+    }
+
+    private static function normalizarDataLiberacao($valor): ?string
+    {
+        $valor = trim((string) $valor);
+        if ($valor === '') {
+            return null;
+        }
+
+        $data = DateTime::createFromFormat('Y-m-d\\TH:i', $valor);
+        $erros = DateTime::getLastErrors();
+        if (!$data || ($erros !== false && ($erros['warning_count'] > 0 || $erros['error_count'] > 0))) {
+            throw new InvalidArgumentException('Informe uma data de liberação válida.');
+        }
+
+        return $data->format('Y-m-d H:i:s');
     }
 }

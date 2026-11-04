@@ -3,6 +3,7 @@ require_once __DIR__ . '/../../configuracoes/app.php';
 require_once __DIR__ . '/../../nucleo/Seguranca.php';
 require_once __DIR__ . '/../../nucleo/Auth.php';
 require_once __DIR__ . '/../../nucleo/Avatar.php';
+require_once __DIR__ . '/../../modelos/DesafioModel.php';
 require_once __DIR__ . '/../../modelos/TurmaModel.php';
 require_once __DIR__ . '/../../controllers/TurmaController.php';
 
@@ -21,6 +22,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         TurmaController::processarAdicionarAluno();
     } elseif ($acao === 'remover_aluno') {
         TurmaController::processarRemoverAluno();
+    } elseif ($acao === 'associar_desafio') {
+        TurmaController::processarAssociarDesafio();
+    } elseif ($acao === 'remover_desafio') {
+        TurmaController::processarRemoverDesafio();
     }
 }
 
@@ -29,7 +34,7 @@ $nomeUsuario = $usuario['nome'] ?? 'Professor';
 $idProfessor = (int) ($usuario['id'] ?? 0);
 
 $aba = (string) ($_GET['aba'] ?? 'turmas');
-if (!in_array($aba, ['turmas', 'nova', 'alunos'], true)) {
+if (!in_array($aba, ['turmas', 'nova', 'alunos', 'desafios'], true)) {
     $aba = 'turmas';
 }
 
@@ -39,12 +44,12 @@ $buscaAluno = trim((string) ($_GET['q'] ?? ''));
 $turmas = TurmaModel::listarPorProfessor($idProfessor);
 
 $turmaSelecionada = null;
-if ($aba === 'alunos') {
+if (in_array($aba, ['alunos', 'desafios'], true)) {
     if ($idTurmaSelecionada > 0 && TurmaModel::professorGerenciaTurma($idProfessor, $idTurmaSelecionada)) {
         $turmaSelecionada = TurmaModel::buscarPorId($idTurmaSelecionada);
     } elseif (!empty($turmas)) {
         // Sem turma escolhida, abre a primeira para facilitar
-        header('Location: ./turmas.php?aba=alunos&id=' . (int) $turmas[0]['id_turma']);
+        header('Location: ./turmas.php?aba=' . $aba . '&id=' . (int) $turmas[0]['id_turma']);
         exit;
     }
 }
@@ -53,6 +58,15 @@ $alunosTurma = $turmaSelecionada ? TurmaModel::listarAlunos((int) $turmaSelecion
 $resultadosBusca = ($turmaSelecionada && $buscaAluno !== '')
     ? TurmaModel::buscarAlunos($buscaAluno, (int) $turmaSelecionada['id_turma'])
     : [];
+$desafiosTurma = ($turmaSelecionada && $aba === 'desafios')
+    ? DesafioModel::listarAtivosParaTurma((int) $turmaSelecionada['id_turma'])
+    : [];
+$desafiosAssociados = array_values(array_filter($desafiosTurma, static fn($desafio) => $desafio['associado_id_turma'] !== null));
+$desafiosDisponiveis = array_values(array_filter($desafiosTurma, static fn($desafio) => $desafio['associado_id_turma'] === null));
+$proximaOrdem = 1;
+if ($desafiosAssociados) {
+    $proximaOrdem = max(array_map(static fn($desafio) => (int) $desafio['ordem'], $desafiosAssociados)) + 1;
+}
 
 $flash = $_SESSION['flash'] ?? null;
 unset($_SESSION['flash']);
@@ -171,6 +185,9 @@ $csrfToken = Seguranca::gerarTokenCsrf();
                 <a role="tab" class="classes-tab <?php echo $aba === 'nova' ? 'active' : ''; ?>" href="./turmas.php?aba=nova">Nova turma</a>
                 <?php if ($aba === 'alunos' && $turmaSelecionada): ?>
                 <a role="tab" class="classes-tab active" href="./turmas.php?aba=alunos&amp;id=<?php echo (int) $turmaSelecionada['id_turma']; ?>">Alunos</a>
+                <?php endif; ?>
+                <?php if ($aba === 'desafios' && $turmaSelecionada): ?>
+                <a role="tab" class="classes-tab active" href="./turmas.php?aba=desafios&amp;id=<?php echo (int) $turmaSelecionada['id_turma']; ?>">Desafios</a>
                 <?php endif; ?>
             </div>
 
@@ -291,6 +308,71 @@ $csrfToken = Seguranca::gerarTokenCsrf();
                 </div>
             </section>
 
+            <?php elseif ($aba === 'desafios' && $turmaSelecionada): ?>
+            <!-- Aba: Desafios da turma -->
+            <section class="classes-panel" aria-labelledby="desafios-turma-title">
+                <div class="panel-heading">
+                    <div>
+                        <h2 id="desafios-turma-title">Desafios — <?php echo htmlspecialchars($turmaSelecionada['nome']); ?></h2>
+                        <p>Associe desafios cadastrados à turma e defina suas regras de disponibilidade.</p>
+                    </div>
+                    <img src="../../assets/Icons-NavBar/target.png" alt="">
+                </div>
+
+                <div class="desafio-gerenciamento">
+                    <h3>Desafios associados (<?php echo count($desafiosAssociados); ?>)</h3>
+                    <?php if (empty($desafiosAssociados)): ?>
+                    <p class="aluno-empty-hint">Nenhum desafio foi associado a esta turma.</p>
+                    <?php else: ?>
+                    <ul class="aluno-list">
+                        <?php foreach ($desafiosAssociados as $desafio): ?>
+                        <li class="aluno-item desafio-item">
+                            <div class="aluno-info">
+                                <strong><?php echo htmlspecialchars($desafio['titulo']); ?></strong>
+                                <small><?php echo $desafio['visibilidade'] === 'PRIVADO' ? 'Privado' : ($desafio['visibilidade'] === 'PUBLICO' ? 'Público' : 'Pendente'); ?> · Ordem <?php echo (int) $desafio['ordem']; ?> · <?php echo (int) $desafio['obrigatorio'] === 1 ? 'Obrigatório' : 'Opcional'; ?><?php if (!empty($desafio['data_liberacao'])): ?> · Liberação <?php echo htmlspecialchars(date('d/m/Y H:i', strtotime($desafio['data_liberacao']))); ?><?php endif; ?></small>
+                            </div>
+                            <form method="post" action="./turmas.php" class="desafio-remove-form" data-confirm-remocao="Remover este desafio da turma?">
+                                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
+                                <input type="hidden" name="acao" value="remover_desafio">
+                                <input type="hidden" name="id_turma" value="<?php echo (int) $turmaSelecionada['id_turma']; ?>">
+                                <input type="hidden" name="id_desafio" value="<?php echo (int) $desafio['id_desafio']; ?>">
+                                <button class="mini-action danger" type="submit">Remover</button>
+                            </form>
+                        </li>
+                        <?php endforeach; ?>
+                    </ul>
+                    <?php endif; ?>
+                </div>
+
+                <div class="desafio-gerenciamento">
+                    <h3>Desafios cadastrados (<?php echo count($desafiosDisponiveis); ?>)</h3>
+                    <?php if (empty($desafiosDisponiveis)): ?>
+                    <p class="aluno-empty-hint">Todos os desafios ativos já estão associados a esta turma.</p>
+                    <?php else: ?>
+                    <ul class="aluno-list">
+                        <?php foreach ($desafiosDisponiveis as $desafio): ?>
+                        <li class="aluno-item desafio-item desafio-disponivel">
+                            <div class="aluno-info">
+                                <strong><?php echo htmlspecialchars($desafio['titulo']); ?></strong>
+                                <small><?php echo $desafio['visibilidade'] === 'PRIVADO' ? 'Privado' : ($desafio['visibilidade'] === 'PUBLICO' ? 'Público' : 'Pendente'); ?> · <?php echo htmlspecialchars($desafio['categoria'] ?: 'Desafio'); ?> · <?php echo htmlspecialchars($desafio['dificuldade']); ?> · <?php echo (int) $desafio['pontuacao_maxima']; ?> XP</small>
+                            </div>
+                            <form method="post" action="./turmas.php" class="desafio-associar-form">
+                                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
+                                <input type="hidden" name="acao" value="associar_desafio">
+                                <input type="hidden" name="id_turma" value="<?php echo (int) $turmaSelecionada['id_turma']; ?>">
+                                <input type="hidden" name="id_desafio" value="<?php echo (int) $desafio['id_desafio']; ?>">
+                                <label>Ordem <input type="number" name="ordem" min="1" value="<?php echo $proximaOrdem; ?>" required></label>
+                                <label><input type="checkbox" name="obrigatorio" checked> Obrigatório</label>
+                                <label>Liberação <input type="datetime-local" name="data_liberacao"></label>
+                                <button class="mini-action" type="submit">Associar</button>
+                            </form>
+                        </li>
+                        <?php endforeach; ?>
+                    </ul>
+                    <?php endif; ?>
+                </div>
+            </section>
+
             <?php else: ?>
             <!-- Aba: Minhas turmas -->
             <section class="classes-toolbar" aria-label="Filtros de turmas">
@@ -330,6 +412,7 @@ $csrfToken = Seguranca::gerarTokenCsrf();
                         <p class="turma-description"><?php echo htmlspecialchars($turma['descricao']); ?></p>
                         <?php endif; ?>
                         <a class="secondary-action" href="./turmas.php?aba=alunos&amp;id=<?php echo (int) $turma['id_turma']; ?>">Gerenciar alunos</a>
+                        <a class="secondary-action" href="./turmas.php?aba=desafios&amp;id=<?php echo (int) $turma['id_turma']; ?>">Gerenciar desafios</a>
                         <form method="post" action="./turmas.php" class="turma-delete-form" data-confirm-exclusao="Tem certeza que deseja excluir a turma &quot;<?php echo htmlspecialchars($turma['nome']); ?>&quot;? Os alunos não serão apagados, mas perderão o acesso por esta turma.">
                             <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
                             <input type="hidden" name="acao" value="excluir_turma">
@@ -372,6 +455,13 @@ $csrfToken = Seguranca::gerarTokenCsrf();
                     if (!window.confirm(div.textContent || msg)) {
                         e.preventDefault();
                     }
+                });
+            });
+
+            document.querySelectorAll('.desafio-remove-form').forEach(form => {
+                form.addEventListener('submit', (e) => {
+                    const msg = form.getAttribute('data-confirm-remocao') || 'Remover este desafio da turma?';
+                    if (!window.confirm(msg)) e.preventDefault();
                 });
             });
 

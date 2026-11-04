@@ -82,7 +82,6 @@ final class AuthController
 
             session_regenerate_id(true);
             $_SESSION['usuario'] = $dadosSessao;
-            Seguranca::flash('success', 'Login realizado com sucesso.');
             Auth::redirecionarDashboard($dadosSessao);
         } catch (Throwable $e) {
             error_log('Erro no login: ' . $e->getMessage());

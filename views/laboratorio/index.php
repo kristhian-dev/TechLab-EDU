@@ -4,6 +4,7 @@
 require_once __DIR__ . '/../../configuracoes/app.php';
 require_once __DIR__ . '/../../nucleo/Seguranca.php';
 require_once __DIR__ . '/../../nucleo/Auth.php';
+require_once __DIR__ . '/../../modelos/DesafioModel.php';
 
 Auth::exigeLogin();
 
@@ -15,17 +16,18 @@ $challengeId = $challengeId !== false && $challengeId !== null ? $challengeId : 
 
 $challenge = null;
 if ($challengeId !== null) {
-    $pdo = Database::pdo();
-    $stmt = $pdo->prepare(
-        'SELECT id_desafio, titulo, descricao, objetivo, dificuldade
-         FROM desafios
-         WHERE id_desafio = :id AND ativo = TRUE
-         LIMIT 1'
-    );
-    $stmt->execute(['id' => $challengeId]);
-    $row = $stmt->fetch();
+    $usuario = Auth::usuarioLogado() ?: [];
+    $row = ($usuario['perfil'] ?? 'aluno') === 'aluno'
+        ? DesafioModel::buscarVisivelParaAluno($challengeId, (int) ($usuario['id'] ?? 0))
+        : DesafioModel::buscarAtivoPorId($challengeId);
+
+    if (($usuario['perfil'] ?? 'aluno') === 'aluno' && !$row) {
+        http_response_code(404);
+        exit('Desafio não encontrado.');
+    }
 
     if ($row) {
+        $pdo = Database::pdo();
         $dificuldadeMap = [
             'FACIL'   => ['difficulty' => 'FÁCIL',   'difficulty_class' => 'easy'],
             'MEDIO'   => ['difficulty' => 'MÉDIO',   'difficulty_class' => 'medium'],
@@ -90,7 +92,7 @@ function escape($value) { return htmlspecialchars($value, ENT_QUOTES, 'UTF-8'); 
 <head>
     <meta charset="UTF-8"><meta name="csrf-token" content="<?= Seguranca::gerarTokenCsrf() ?>"><meta name="lab-usuario" content="<?= htmlspecialchars(json_encode($_SESSION['usuario'] ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT), ENT_QUOTES, 'UTF-8') ?>">
 <meta name="lab-desafio-condicoes" content="<?= htmlspecialchars(json_encode($challenge['condicoes_resolucao'] ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT), ENT_QUOTES, 'UTF-8') ?>">
-<meta name="lab-desafio-id" content="<?= $challenge["id"] ?? 0 ?>>
+<meta name="lab-desafio-id" content="<?= (int) ($challenge['id'] ?? 0) ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laboratório de Montagem - TechLab EDU</title>
     <link rel="shortcut icon" href="../../assets/logo/Logo_TechLabEDU.png" type="image/x-icon">
@@ -142,6 +144,6 @@ function escape($value) { return htmlspecialchars($value, ENT_QUOTES, 'UTF-8'); 
         </section><section class="lab-panel" id="info-panel" hidden><div class="info-box" id="component-info"><strong>Nenhum componente selecionado</strong><p>Selecione uma peça na bancada ou na biblioteca para consultar seus dados disponíveis.</p></div><div class="info-box"><strong>Como funciona</strong><p>Arraste as peças até os encaixes compatíveis. Uma posição inválida não será instalada.</p></div></section><section class="component-library" aria-labelledby="library-title"><h2 class="lab-section-title" id="library-title">Biblioteca de componentes</h2><p class="library-description">Escolha uma peça para explorar a montagem.</p><input id="component-search" type="search" placeholder="Pesquisar peça..." aria-label="Pesquisar peça"><div id="component-list"></div></section></aside>
     </div>
     </section><div class="lab-modal" id="help-modal" hidden><div class="lab-modal-card"><h2>Como montar</h2><p>Escolha uma peça na biblioteca e arraste-a até a área compatível da placa-mãe. A memória RAM é o componente necessário para o diagnóstico inicial do desafio.</p><button type="button" id="close-help">Entendido</button></div></div>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script><script src="../js/laboratorio.js?v=12"></script>
+    <script>window.__labComponentIds = <?= json_encode(['amd-ryzen-5-5600g' => 101, 'msi-b450m-gaming-plus' => 102, 'ram-16gb-ddr4-3200' => 103, 'gpu-nvidia-geforce-rtx-3060' => 104, 'ssd-1tb-m2-nvme-pcie' => 105, 'psu-650w' => 106, 'cooler-master-hyper-212' => 107, 'deepcool-gamer-atx' => 108], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;</script><script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script><script src="../js/laboratorio.js?v=12"></script>
 </body>
 </html>

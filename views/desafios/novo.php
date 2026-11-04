@@ -3,16 +3,34 @@ require_once __DIR__ . '/../../configuracoes/app.php';
 require_once __DIR__ . '/../../nucleo/Seguranca.php';
 require_once __DIR__ . '/../../nucleo/Auth.php';
 require_once __DIR__ . '/../../modelos/DesafioModel.php';
+require_once __DIR__ . '/../../modelos/TurmaModel.php';
 require_once __DIR__ . '/../../controllers/DesafioController.php';
 
 Auth::exigePerfil('professor', 'administrador');
 
+$idEdicao = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+$idEdicao = $idEdicao !== false && $idEdicao !== null && $idEdicao > 0 ? $idEdicao : 0;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if ($idEdicao > 0) {
+        DesafioController::processarEdicao($idEdicao);
+    }
     DesafioController::processarCriacao();
 }
 
 $usuario = Auth::usuarioLogado() ?: ['nome' => 'Professor', 'perfil' => 'professor'];
 $nomeUsuario = $usuario['nome'] ?? 'Professor';
+$idProfessor = (int) ($usuario['id'] ?? 0);
+$desafioEdicao = $idEdicao > 0 ? DesafioModel::buscarDoProfessor($idEdicao, $idProfessor) : null;
+if ($idEdicao > 0 && !$desafioEdicao) {
+    Seguranca::flash('danger', 'Desafio não encontrado ou não pertence ao seu usuário.');
+    Seguranca::redirecionar('index.php');
+}
+$turmas = TurmaModel::listarPorProfessor($idProfessor);
+$turmasSelecionadas = $desafioEdicao ? DesafioModel::listarTurmasDoDesafio($idEdicao) : [];
+$valor = static function (string $campo, string $padrao = '') use ($desafioEdicao): string {
+    return htmlspecialchars((string) ($desafioEdicao[$campo] ?? $padrao), ENT_QUOTES, 'UTF-8');
+};
+$visibilidadeAtual = (string) ($desafioEdicao['visibilidade'] ?? 'PUBLICO');
 $flash = $_SESSION['flash'] ?? null;
 unset($_SESSION['flash']);
 $csrfToken = Seguranca::gerarTokenCsrf();
@@ -23,7 +41,7 @@ $csrfToken = Seguranca::gerarTokenCsrf();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Novo Desafio - TechLab EDU</title>
+    <title><?php echo $idEdicao > 0 ? 'Editar desafio' : 'Novo Desafio'; ?> - TechLab EDU</title>
     <link rel="shortcut icon" href="../../assets/logo/Logo_TechLabEDU.png" type="image/x-icon">
     <link rel="stylesheet" href="../css/desafios.css">
 </head>
@@ -41,8 +59,8 @@ $csrfToken = Seguranca::gerarTokenCsrf();
                     </div>
                 </div>
                 <div class="page-info">
-                    <h2>Novo Desafio</h2>
-                    <p>Cadastre um desafio para suas turmas</p>
+                    <h2><?php echo $idEdicao > 0 ? 'Editar desafio' : 'Novo Desafio'; ?></h2>
+                    <p><?php echo $idEdicao > 0 ? 'Atualize a visibilidade e as turmas autorizadas.' : 'Cadastre um desafio público ou privado.'; ?></p>
                 </div>
             </div>
             <div class="header-right">
@@ -93,38 +111,38 @@ $csrfToken = Seguranca::gerarTokenCsrf();
                 <?php endif; ?>
 
                 <div class="challenge-form-card">
-                    <h1>Cadastrar novo desafio</h1>
-                    <p class="form-subtitle">Preencha os dados abaixo para criar um desafio. Ele ficará disponível para vincular às suas turmas.</p>
+                    <h1><?php echo $idEdicao > 0 ? 'Editar desafio' : 'Cadastrar novo desafio'; ?></h1>
+                    <p class="form-subtitle">Desafios privados exigem pelo menos uma turma autorizada. Desafios públicos podem ser associados opcionalmente.</p>
 
-                    <form method="post" action="novo.php" class="challenge-form">
+                    <form method="post" action="novo.php<?php echo $idEdicao > 0 ? '?id=' . $idEdicao : ''; ?>" class="challenge-form">
                         <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
 
                         <div class="form-group">
                             <label for="titulo">Título *</label>
-                            <input type="text" id="titulo" name="titulo" maxlength="150" required placeholder="Ex.: Computador não liga">
+                            <input type="text" id="titulo" name="titulo" maxlength="150" required value="<?php echo $valor('titulo'); ?>" placeholder="Ex.: Computador não liga">
                         </div>
 
                         <div class="form-group">
                             <label for="descricao">Descrição *</label>
-                            <textarea id="descricao" name="descricao" rows="4" required placeholder="Descreva o problema apresentado no desafio"></textarea>
+                            <textarea id="descricao" name="descricao" rows="4" required placeholder="Descreva o problema apresentado no desafio"><?php echo $valor('descricao'); ?></textarea>
                         </div>
 
                         <div class="form-group">
                             <label for="objetivo">Objetivo de aprendizagem</label>
-                            <textarea id="objetivo" name="objetivo" rows="3" placeholder="O que o aluno deve aprender ao resolver este desafio?"></textarea>
+                            <textarea id="objetivo" name="objetivo" rows="3" placeholder="O que o aluno deve aprender ao resolver este desafio?"><?php echo $valor('objetivo'); ?></textarea>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="categoria">Categoria</label>
-                                <input type="text" id="categoria" name="categoria" maxlength="80" placeholder="Ex.: Fonte de alimentação">
+                                <input type="text" id="categoria" name="categoria" maxlength="80" value="<?php echo $valor('categoria'); ?>" placeholder="Ex.: Fonte de alimentação">
                             </div>
                             <div class="form-group">
                                 <label for="dificuldade">Dificuldade</label>
                                 <select id="dificuldade" name="dificuldade">
-                                    <option value="FACIL">Fácil</option>
-                                    <option value="MEDIO">Médio</option>
-                                    <option value="DIFICIL">Difícil</option>
+                                    <option value="FACIL" <?php echo ($desafioEdicao['dificuldade'] ?? 'FACIL') === 'FACIL' ? 'selected' : ''; ?>>Fácil</option>
+                                    <option value="MEDIO" <?php echo ($desafioEdicao['dificuldade'] ?? '') === 'MEDIO' ? 'selected' : ''; ?>>Médio</option>
+                                    <option value="DIFICIL" <?php echo ($desafioEdicao['dificuldade'] ?? '') === 'DIFICIL' ? 'selected' : ''; ?>>Difícil</option>
                                 </select>
                             </div>
                         </div>
@@ -132,17 +150,36 @@ $csrfToken = Seguranca::gerarTokenCsrf();
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="pontuacao_maxima">Pontuação máxima (XP)</label>
-                                <input type="number" id="pontuacao_maxima" name="pontuacao_maxima" min="0" value="100">
+                                <input type="number" id="pontuacao_maxima" name="pontuacao_maxima" min="0" value="<?php echo $valor('pontuacao_maxima', '100'); ?>">
                             </div>
                             <div class="form-group">
                                 <label for="nivel_minimo">Nível mínimo</label>
-                                <input type="number" id="nivel_minimo" name="nivel_minimo" min="1" value="1">
+                                <input type="number" id="nivel_minimo" name="nivel_minimo" min="1" value="<?php echo $valor('nivel_minimo', '1'); ?>">
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="visibilidade">Visibilidade *</label>
+                                    <select id="visibilidade" name="visibilidade" required>
+                                        <option value="PUBLICO" <?php echo $visibilidadeAtual === 'PUBLICO' ? 'selected' : ''; ?>>Público</option>
+                                        <option value="PRIVADO" <?php echo $visibilidadeAtual === 'PRIVADO' ? 'selected' : ''; ?>>Privado</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="turma_ids">Turmas associadas</label>
+                                    <select id="turma_ids" name="turma_ids[]" multiple size="4">
+                                        <?php foreach ($turmas as $turma): ?>
+                                        <option value="<?php echo (int) $turma['id_turma']; ?>" <?php echo in_array((int) $turma['id_turma'], $turmasSelecionadas, true) ? 'selected' : ''; ?>><?php echo htmlspecialchars($turma['nome']); ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                    <small>Obrigatório quando a visibilidade for privada. A associação não altera um desafio público para privado.</small>
+                                </div>
                             </div>
                         </div>
 
                         <div class="form-actions">
                             <button type="button" class="btn-cancel" onclick="window.location.href='index.php'">Cancelar</button>
-                            <button type="submit" class="btn-submit">Criar desafio</button>
+                            <button type="submit" class="btn-submit"><?php echo $idEdicao > 0 ? 'Salvar alterações' : 'Criar desafio'; ?></button>
                         </div>
                     </form>
                 </div>

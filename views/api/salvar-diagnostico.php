@@ -4,6 +4,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../../configuracoes/app.php';
 require_once APP_ROOT . '/nucleo/Database.php';
 require_once APP_ROOT . '/nucleo/Seguranca.php';
+require_once APP_ROOT . '/modelos/DesafioModel.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -72,6 +73,13 @@ try {
         $pdo->rollBack();
         http_response_code(403);
         echo json_encode(['ok' => false, 'erro' => 'Build nao encontrada ou nao pertence ao usuario.']);
+        exit;
+    }
+
+    if ($idDesafio !== null && !DesafioModel::buscarVisivelParaAluno($idDesafio, (int) $build['id_aluno'])) {
+        $pdo->rollBack();
+        http_response_code(403);
+        echo json_encode(['ok' => false, 'erro' => 'Desafio nao disponivel para este aluno.']);
         exit;
     }
 
