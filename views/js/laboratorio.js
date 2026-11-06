@@ -1271,10 +1271,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         }
 
+<<<<<<< HEAD
 
 
         result.textContent = mensagem;
 
+=======
+result.textContent = mensagem;
+>>>>>>> 53c2cf9 (Atualiza laboratório de montagem e diagnóstico)
         result.classList.add(classe);
 
         result.style.whiteSpace = 'pre-line';
@@ -1386,7 +1390,46 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
         }
+<<<<<<< HEAD
 
+=======
+        // Integração com conclusão de desafios
+        // Se não houver issues críticos e houver desafio ativo, solicitar conclusão
+        if (classe === 'success' && window.__labDesafioId > 0 && state.id_build) {
+            // Preparar payload para o endpoint de conclusão
+            const csrfToken = getCsrfToken();
+            const payload = {
+                id_build: state.id_build,
+                id_desafio: window.__labDesafioId,
+                csrf_token: csrfToken
+            };
+            // Enviar requisição para concluir o desafio
+            fetch('../api/registrar-conclusao-desafio.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Tratar resultado
+                if (data.ok) {
+                    if (data.ja_concluido) {
+                        showToast('Este desafio já havia sido concluído anteriormente.');
+                    } else {
+                        showToast(data.mensagem || 'Desafio concluído com sucesso!');
+                    }
+                } else {
+                    showToast(data.erro || 'Não foi possível registrar a conclusão do desafio.');
+                }
+            })
+            .catch(error => {
+                showToast('Erro de rede ao tentar concluir o desafio.');
+                console.error('Erro ao concluir desafio:', error);
+            });
+        }
+>>>>>>> 53c2cf9 (Atualiza laboratório de montagem e diagnóstico)
     }
 
 
@@ -1488,7 +1531,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 buildId = data.id_build;
 
                 showToast(data.mensagem || 'Build salva com sucesso.');
+<<<<<<< HEAD
 
+=======
+// Armazena o id_build no estado para uso futuro
+                if (data.id_build !== undefined) {
+                    state.id_build = data.id_build;
+                }
+>>>>>>> 53c2cf9 (Atualiza laboratório de montagem e diagnóstico)
                 return data;
 
             }
@@ -1582,16 +1632,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const helpButton = document.getElementById('help-button');
 
     const closeHelpButton = document.getElementById('close-help');
+<<<<<<< HEAD
 
+=======
+const usuarioMeta = document.querySelector('meta[name=\"lab-usuario\"]');
+    window.__labUsuario = usuarioMeta ? JSON.parse(usuarioMeta.getAttribute('content') || '{}') : null;
+    
+    // Ler o ID do desafio ativo da meta tag
+    const desafioMeta = document.querySelector('meta[name=\"lab-desafio-id\"]');
+    window.__labDesafioId = desafioMeta ? parseInt(desafioMeta.getAttribute('content') || '0') : 0;
+>>>>>>> 53c2cf9 (Atualiza laboratório de montagem e diagnóstico)
     if (helpButton && helpModal) helpButton.addEventListener('click', () => { helpModal.hidden = false; });
 
     if (closeHelpButton && helpModal) closeHelpButton.addEventListener('click', () => { helpModal.hidden = true; });
 
     if (helpModal) helpModal.addEventListener('click', (event) => { if (event.target === helpModal) helpModal.hidden = true; });
+<<<<<<< HEAD
 
         const usuarioMeta = document.querySelector('meta[name="lab-usuario"]');
 
     window.__labUsuario = usuarioMeta ? JSON.parse(usuarioMeta.getAttribute('content') || '{}') : null;
+=======
+>>>>>>> 53c2cf9 (Atualiza laboratório de montagem e diagnóstico)
 
 
 
